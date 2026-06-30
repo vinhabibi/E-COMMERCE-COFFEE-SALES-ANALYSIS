@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>E-Commerce Coffee Shop Sales Dashboard | Vincent Kimutai</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f0f0f;color:#f0f0f0;min-height:100vh;padding:20px}
+.dash{max-width:960px;margin:0 auto}
+.dash-header{text-align:center;margin-bottom:20px}
+.dash-header h1{font-size:18px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#d4a54a;margin-bottom:4px}
+.dash-header p{font-size:12px;color:#888;margin-bottom:2px}
+.kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:16px}
+.kpi{background:#1a1a1a;border-radius:8px;padding:12px;text-align:center;border:1px solid #2a2a2a}
+.kpi-label{font-size:11px;color:#888;margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em}
+.kpi-val{font-size:22px;font-weight:600;color:#f0f0f0}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:10px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.card{background:#1a1a1a;border-radius:10px;padding:14px;border:1px solid #2a2a2a}
+.card-title{font-size:11px;font-weight:600;color:#aaa;margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em}
+.chart-wrap{position:relative;width:100%}
+.legend{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:8px;font-size:11px;color:#888}
+.leg-dot{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:4px}
+.aov-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;font-size:12px}
+.aov-label{color:#888;min-width:36px}
+.aov-bar-wrap{flex:1;margin:0 8px;background:#2a2a2a;border-radius:2px;height:8px}
+.aov-bar{height:8px;border-radius:2px;background:#2a78d6}
+.aov-val{color:#f0f0f0;min-width:44px;text-align:right;font-weight:500}
+.tab-row{display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr 1fr;font-size:10px;padding:3px 0;gap:2px}
+.tab-head{color:#888;font-weight:500;text-align:right}
+.tab-cell{color:#ccc;text-align:right}
+.tab-label{color:#aaa;text-align:left}
+.tab-total{color:#f0f0f0;font-weight:600;text-align:right}
+.tag{font-size:12px;padding:4px 12px;border-radius:20px;background:#1f2e42;color:#4a9de0;border:1px solid #2a4060}
+.footer{margin-top:16px;text-align:center;font-size:11px;color:#555}
+a{color:#d4a54a;text-decoration:none}
+.table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+
+@media (max-width:900px){
+  .grid3{grid-template-columns:1fr 1fr}
+}
+
+@media (max-width:768px){
+  body{padding:12px}
+  .kpi-row{grid-template-columns:repeat(2,1fr)}
+  .kpi-val{font-size:18px}
+  .grid3,.grid2{grid-template-columns:1fr}
+  .dash-header h1{font-size:15px}
+  .dash-header p{font-size:11px}
+  .chart-wrap{height:180px !important}
+  .tab-row{min-width:480px}
+  .footer p{font-size:10px}
+}
+
+@media (max-width:420px){
+  .kpi-row{grid-template-columns:repeat(2,1fr);gap:8px}
+  .kpi{padding:10px}
+  .kpi-val{font-size:16px}
+  .kpi-label{font-size:9px}
+  .card{padding:10px}
+  .legend{font-size:10px;gap:6px}
+}
+</style>
+</head>
+<body>
+<div class="dash">
+  <div class="dash-header">
+    <h1>E-Commerce Coffee-Shop Sales</h1>
+    <p>Power BI Dashboard · 3K+ Transactions · $1.1M Revenue · 12 Months</p>
+
+  </div>
+
+  <div class="kpi-row">
+    <div class="kpi"><div class="kpi-label">Avg Transaction</div><div class="kpi-val">$31.65</div></div>
+    <div class="kpi"><div class="kpi-label">Monthly Sales</div><div class="kpi-val">112.3K</div></div>
+    <div class="kpi"><div class="kpi-label">Peak Hour</div><div class="kpi-val">10 AM</div></div>
+    <div class="kpi"><div class="kpi-label">Total Revenue</div><div class="kpi-val">$1.1M</div></div>
+    <div class="kpi"><div class="kpi-label">Transactions</div><div class="kpi-val">3K+</div></div>
+  </div>
+
+  <div class="grid3">
+    <div class="card">
+      <div class="card-title">Sales by time of day</div>
+      <div class="legend">
+        <span><span class="leg-dot" style="background:#2a78d6"></span>Night 34%</span>
+        <span><span class="leg-dot" style="background:#eda100"></span>Afternoon 34%</span>
+        <span><span class="leg-dot" style="background:#e34948"></span>Morning 33%</span>
+      </div>
+      <div class="chart-wrap" style="height:140px"><canvas id="pieChart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Top coffee types by revenue</div>
+      <div class="chart-wrap" style="height:170px"><canvas id="coffeeBar"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Avg order value by day of week</div>
+      <div style="margin-top:4px">
+        <div class="aov-row"><span class="aov-label">Mon</span><div class="aov-bar-wrap"><div class="aov-bar" style="width:100%"></div></div><span class="aov-val">$31.92</span></div>
+        <div class="aov-row"><span class="aov-label">Sun</span><div class="aov-bar-wrap"><div class="aov-bar" style="width:98%"></div></div><span class="aov-val">$31.83</span></div>
+        <div class="aov-row"><span class="aov-label">Tue</span><div class="aov-bar-wrap"><div class="aov-bar" style="width:96%"></div></div><span class="aov-val">$31.76</span></div>
+        <div class="aov-row"><span class="aov-label">Fri</span><div class="aov-bar-wrap"><div class="aov-bar" style="width:94%"></div></div><span class="aov-val">$31.58</span></div>
+        <div class="aov-row"><span class="aov-label">Thu</span><div class="aov-bar-wrap"><div class="aov-bar" style="width:93%"></div></div><span class="aov-val">$31.55</span></div>
+        <div class="aov-row"><span class="aov-label">Wed</span><div class="aov-bar-wrap"><div class="aov-bar" style="width:92%"></div></div><span class="aov-val">$31.50</span></div>
+        <div class="aov-row"><span class="aov-label">Sat</span><div class="aov-bar-wrap"><div class="aov-bar" style="width:90%"></div></div><span class="aov-val">$31.35</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid3">
+    <div class="card">
+      <div class="card-title">Monthly sales performance</div>
+      <div class="chart-wrap" style="height:200px"><canvas id="monthBar"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Revenue breakdown by month</div>
+      <div class="chart-wrap" style="height:200px"><canvas id="revMonth"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Revenue vs transaction volume</div>
+      <div class="legend">
+        <span><span class="leg-dot" style="background:#2a78d6;border-radius:2px"></span>Transactions</span>
+        <span><span class="leg-dot" style="background:#eda100;border-radius:2px"></span>Revenue ($K)</span>
+      </div>
+      <div class="chart-wrap" style="height:180px"><canvas id="dualBar"></canvas></div>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title">Sales by time of day × weekday</div>
+      <div class="table-scroll">
+      <div class="tab-row" style="margin-bottom:4px">
+        <span class="tab-label" style="color:#666;font-size:10px">Time</span>
+        <span class="tab-head">Fri</span><span class="tab-head">Mon</span><span class="tab-head">Sat</span><span class="tab-head">Sun</span><span class="tab-head">Thu</span><span class="tab-head">Tue</span>
+      </div>
+      <div style="border-top:1px solid #2a2a2a;margin-bottom:4px"></div>
+      <div class="tab-row"><span class="tab-label">Afternoon</span><span class="tab-cell">5,504</span><span class="tab-cell">5,664</span><span class="tab-cell">6,307</span><span class="tab-cell">5,290</span><span class="tab-cell">5,203</span><span class="tab-cell">5,012</span></div>
+      <div class="tab-row"><span class="tab-label">Morning</span><span class="tab-cell">5,839</span><span class="tab-cell">5,987</span><span class="tab-cell">4,370</span><span class="tab-cell">3,687</span><span class="tab-cell">4,419</span><span class="tab-cell">5,343</span></div>
+      <div class="tab-row"><span class="tab-label">Night</span><span class="tab-cell">5,459</span><span class="tab-cell">5,711</span><span class="tab-cell">3,855</span><span class="tab-cell">4,348</span><span class="tab-cell">6,468</span><span class="tab-cell">6,812</span></div>
+      <div style="border-top:1px solid #2a2a2a;margin-top:4px;padding-top:4px">
+        <div class="tab-row"><span class="tab-label" style="font-weight:600;color:#f0f0f0">Total</span><span class="tab-total">16,802</span><span class="tab-total">17,363</span><span class="tab-total">14,733</span><span class="tab-total">13,336</span><span class="tab-total">16,091</span><span class="tab-total">18,168</span></div>
+      </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Sales by hour of day (weekday)</div>
+      <div class="chart-wrap" style="height:170px"><canvas id="hourBar"></canvas></div>
+    </div>
+  </div>
+
+  <div style="margin-top:12px;padding:12px 14px;background:#1a1a1a;border-radius:8px;border:1px solid #2a2a2a;display:flex;align-items:center;flex-wrap:wrap;gap:10px">
+    <span style="font-size:11px;color:#666;font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-right:4px">Tech stack:</span>
+    <span class="tag">Power BI</span>
+    <span class="tag">DAX Measures</span>
+    <span class="tag">CSV Data Processing</span>
+    <span class="tag">Business Analytics</span>
+  </div>
+
+  <div class="footer" style="margin-top:14px">
+    <p>Built by <a href="https://vinhabibi.github.io/vincent-kimutai/" target="_blank">Vincent Kimutai</a> · GitHub: <a href="https://github.com/vinhabibi" target="_blank">vinhabibi</a></p>
+  </div>
+</div>
+
+<script>
+const grid='#2a2a2a', muted='#777', txt='#ccc';
+const baseOpts=()=>({
+  responsive:true,maintainAspectRatio:false,
+  plugins:{legend:{display:false}},
+  scales:{
+    x:{grid:{color:'transparent'},ticks:{color:muted,font:{size:9}},border:{display:false}},
+    y:{grid:{color:grid},ticks:{color:muted,font:{size:9}},border:{display:false}}
+  }
+});
+
+new Chart(document.getElementById('pieChart'),{type:'pie',data:{labels:['Morning','Afternoon','Night'],datasets:[{data:[33,34,34],backgroundColor:['#e34948','#eda100','#2a78d6'],borderWidth:2,borderColor:'#0f0f0f'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}});
+
+new Chart(document.getElementById('coffeeBar'),{type:'bar',data:{labels:['Latte','Cappuccino','Americano','Macchiato','Hot Choc.','Cortado','Espresso'],datasets:[{data:[53,53,40,40,20,19,8],backgroundColor:'#2a78d6',borderRadius:4}]},options:{...baseOpts(),scales:{x:{grid:{color:'transparent'},ticks:{color:muted,font:{size:8},maxRotation:45},border:{display:false}},y:{grid:{color:grid},ticks:{color:muted,font:{size:9},callback:v=>v+'K'},border:{display:false}}}}});
+
+new Chart(document.getElementById('monthBar'),{type:'bar',data:{labels:['Mar','Oct','Nov','Dec','Sep','Jun','May','Apr','Aug','Jul','Jan'],datasets:[{data:[15.9,13.2,10,8.6,8.2,7.1,8.2,8.5,7.2,6.4,8.4],backgroundColor:'#2a78d6',borderRadius:4}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:grid},ticks:{color:muted,font:{size:9},callback:v=>v+'K'},border:{display:false}},y:{grid:{color:'transparent'},ticks:{color:muted,font:{size:9}},border:{display:false}}}}});
+
+new Chart(document.getElementById('revMonth'),{type:'bar',data:{labels:['Mar','Oct','Feb','Nov','Dec','Sep','May','Jun','Apr','Aug','Jul','Jan'],datasets:[{data:[15,13,11,11,8.2,8.2,7.1,7.4,6.4,6.4,5.7,4.4],backgroundColor:'#d4a54a',borderRadius:4}]},options:{...baseOpts(),scales:{x:{grid:{color:'transparent'},ticks:{color:muted,font:{size:8},maxRotation:45},border:{display:false}},y:{grid:{color:grid},ticks:{color:muted,font:{size:9},callback:v=>v+'K'},border:{display:false}}}}});
+
+new Chart(document.getElementById('dualBar'),{type:'bar',data:{labels:['Latte','Americano','Cappuc.','Hot Choc.','Cortado','Espresso'],datasets:[{label:'Transactions',data:[27,25,15,11,10,7],backgroundColor:'#2a78d6',borderRadius:3},{label:'Revenue ($K)',data:[24,17,14,7,9,3],backgroundColor:'#eda100',borderRadius:3}]},options:{...baseOpts(),scales:{x:{grid:{color:'transparent'},ticks:{color:muted,font:{size:9}},border:{display:false}},y:{grid:{color:grid},ticks:{color:muted,font:{size:9}},border:{display:false}}}}});
+
+new Chart(document.getElementById('hourBar'),{type:'bar',data:{labels:['Tue','Mon','Thu','Fri','Wed','Sat','Sun'],datasets:[{data:[8.2,7.8,7.5,7.4,7.1,6.5,6.0],backgroundColor:'#1baf7a',borderRadius:4}]},options:{...baseOpts(),scales:{x:{grid:{color:'transparent'},ticks:{color:muted,font:{size:10}},border:{display:false}},y:{grid:{color:grid},ticks:{color:muted,font:{size:9},callback:v=>v+'K'},border:{display:false}}}}});
+</script>
+</body>
+</html>
